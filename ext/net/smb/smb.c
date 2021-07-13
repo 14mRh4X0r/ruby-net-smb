@@ -97,7 +97,7 @@ static void smbcctx_auth_fn(SMBCCTX *smbcctx,
     password[0] = '\0';
   }
 
-  RB_SMB_DEBUG("\\%s\%s %s\%s|%s\n", server, share, workgroup, username, password);
+  RB_SMB_DEBUG("\\\\%s\\%s %s\\%s|%s\n", server, share, workgroup, username, password);
 }
 
 static void rb_smb_data_gc_mark(RB_SMB_DATA *data)
@@ -156,10 +156,12 @@ static VALUE rb_smb_initialize(VALUE self)
   /* FIXME: Read unix charset (?) from smb.conf for default encoding */
   data->enc = rb_enc_find("UTF-8");
 
-  smbc_setDebug(data->smbcctx, 0);
+  smbc_setDebug(data->smbcctx, false);
   smbc_setOptionUserData(data->smbcctx, (void *)self);
   smbc_setOptionDebugToStderr(data->smbcctx, SMBC_TRUE);
   smbc_setOptionNoAutoAnonymousLogin(data->smbcctx,  SMBC_TRUE);
+  smbc_setOptionSmbEncryptionLevel(data->smbcctx, SMBC_ENCRYPTLEVEL_NONE);
+  smbc_setOptionUseCCache(data->smbcctx, false);
   smbc_setFunctionAuthDataWithContext(data->smbcctx, smbcctx_auth_fn);
 
   if (smbc_init_context(data->smbcctx) == NULL) {
